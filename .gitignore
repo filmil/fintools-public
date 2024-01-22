@@ -10,3 +10,8 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Private testing data, not to be added to the repository.
+testdata
+testdata_private
+xml_private_test.go
