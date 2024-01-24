@@ -15,3 +15,7 @@
 testdata
 testdata_private
 xml_private_test.go
+
+# These are special files.
+bals.txt
+rows.txt

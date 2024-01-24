@@ -3,13 +3,14 @@ package tiller
 
 import (
 	"crypto/sha256"
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"sort"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/filmil/fintools/pkg/cfg"
 	"github.com/filmil/fintools/pkg/csv2"
 	"github.com/filmil/fintools/pkg/index"
@@ -57,7 +58,7 @@ type Row struct {
 	// The first of the month of Date.
 	Month time.Time
 	// The first of the week of Date.
-	time.Time
+	Week time.Time
 	// A transaction UUID. Each transaction leg has the same UUID.
 	TransactionID string
 	AccountID,
@@ -139,8 +140,9 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 			b.AccountName = acName
 			b.AccountID = acId
 			b.Balance = ac.BeginBalance
-			ret.Balances = append(ret.Balances, b)
 			seen[acName] = struct{}{}
+
+			ret.Balances = append(ret.Balances, b)
 
 			// TODO: filmil - Also needs the end balance I think.
 
@@ -151,7 +153,6 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 		}
 		ret.AccountID = ac.Name
 		es := index.FindOthers(csv2.AssetType, entries)
-		log.Printf("Line item -->\nasset:\n\t%+v\ntxs:\n\t%+v", asset, spew.Sdump(es))
 
 		txid := uuid.New()
 
@@ -162,7 +163,6 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 			r.Description = e.Tx.Description
 			r.Category = c.GetCat(e.AccName)
 			r.Amount = CalculateAmount(e.Ty, e.Tx.Debit, e.Tx.Credit)
-			// TODO: filmil - fill out amount
 			r.Tags = "Tax"
 			r.AccountDesc = e.AccName
 			r.AccountNum = ""   // Dunno.
@@ -186,4 +186,116 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 	SortDater(ret.Rows)
 	SortDater(ret.Balances)
 	return &ret
+}
+
+// Writes the transaction rows.
+func (e *Export) WriteRows(w io.Writer) error {
+	cw := csv.NewWriter(w)
+	defer cw.Flush()
+	h := []string{
+		"T",
+		"Date",
+		"Description",
+		"Category",
+		"Amount", // 5
+		"Tags",
+		"Account", // Account descriptive name
+		"Account #",
+		"Institution",
+		"Month", // 10
+		"Week",
+		"Transaction ID",
+		"Account ID",
+		"Check Number",
+		"Full Description", // 15
+		"Date Added",
+		"Categorized Date",
+	}
+	if err := cw.Write(h); err != nil {
+		return fmt.Errorf("could not write header: %w", err)
+	}
+	for _, row := range e.Rows {
+		t := time.Time(row.Date)
+		f := t.Format(csv2.DateLayout)
+		r := []string{
+			"",
+			f,                 // "Date",
+			row.Description,   // "Description",
+			row.Category,      // "Category",
+			USD(&row.Amount),  // "Amount",        // 5
+			row.Tags,          // "Tags",
+			row.AccountDesc,   // "Account", // Account descriptive name
+			row.AccountNum,    // "Account #",
+			"",                // "Institution",
+			f,                 // "Month",          // 10
+			f,                 // "Week",
+			row.TransactionID, //"Transaction ID",
+			row.AccountID,     // "Account ID",
+			"", "Check Number",
+			row.Description, "Full Description", // 15
+			f,  // "Date Added",
+			"", // Categorized Date",
+		}
+		if err := cw.Write(r); err != nil {
+			return fmt.Errorf("could not write row: %+v: %w", row, err)
+		}
+	}
+	return nil
+}
+
+func USD(b *big.Float) string {
+	return fmt.Sprintf("$%v", b.Text('f', 6))
+}
+
+func (e *Export) WriteBalances(w io.Writer) error {
+	cw := csv.NewWriter(w)
+	defer cw.Flush()
+	// Write the headers of the account balances
+	h := []string{
+		"T",
+		"Date",
+		"Time",
+		"Account",
+		"Account #", // 5
+		"Account ID",
+		"Balance ID",
+		"Institution",
+		"Balance",
+		"Month", // 10
+		"Week",
+		"Type",
+		"Class",
+		"Account Status",
+		"Date Added", // 15
+	}
+	if err := cw.Write(h); err != nil {
+		return fmt.Errorf("could not write header: %w", err)
+	}
+	for _, bal := range e.Balances {
+		log.Printf("bal: %+v", bal)
+		t := time.Time(bal.Date)
+		f := t.Format(csv2.DateLayout)
+		r := []string{
+			"",
+			f, // Date
+			f, // Time
+			bal.AccountName,
+			"", // 5: Account #
+			bal.AccountID,
+			uuid.New().String(), // Balance ID (unique ID)
+			"",                  // "Institution",
+			USD(&bal.Balance),   // Balance,
+			f,                   // Month
+			f,                   // Week
+			"Other",             // Type
+			"Asset",             // "Class",
+			"ACTIVE",            // Account status
+			f,                   // Date Added
+		}
+		log.Printf("r  : %+v", r)
+		if err := cw.Write(r); err != nil {
+			return fmt.Errorf("could not write balance: %+v: %w", bal, err)
+		}
+	}
+	return nil
 }
