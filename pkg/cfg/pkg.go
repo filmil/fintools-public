@@ -38,6 +38,8 @@ func (i Instance) GetID() string {
 	return i.id
 }
 
+// GetCat returns a category for the given account. If not found, the account
+// name is returned.
 func (i Instance) GetCat(acc string) string {
 	v, ok := i.m[acc]
 	if !ok {

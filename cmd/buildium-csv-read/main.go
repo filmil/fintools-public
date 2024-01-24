@@ -54,8 +54,8 @@ func main() {
 		  "account_id": "manual:some_account",
 		  "account_map": [
 			{
-				"original": "id",
-				"category": "cat"
+				"original": "Utilities - Common SD1/Sewer",
+				"category": "XX - Category"
 			}
 		  ]
 		}

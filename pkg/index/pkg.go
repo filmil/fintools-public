@@ -8,26 +8,26 @@ import (
 )
 
 type Entry struct {
-	AccountName string
-	Ty          csv2.AccountType
-	Tr          *csv2.Transaction
+	AccName string
+	Ty      csv2.AccountType
+	Tx      *csv2.Transaction
 	//Acc *csv2.Account
 }
 
 func FindFirstByType(t csv2.AccountType, es []Entry) (*csv2.Transaction, string) {
 	for _, e := range es {
 		if e.Ty == t {
-			return e.Tr, e.AccountName
+			return e.Tx, e.AccName
 		}
 	}
 	return nil, ""
 }
 
-func FindOthers(t csv2.AccountType, es []Entry) []*csv2.Transaction {
-	var ret []*csv2.Transaction
-	for _, e := range es {
+func FindOthers(t csv2.AccountType, es []Entry) []*Entry {
+	var ret []*Entry
+	for i, e := range es {
 		if e.Ty != t {
-			ret = append(ret, e.Tr)
+			ret = append(ret, &es[i])
 		}
 	}
 	return ret
@@ -35,10 +35,10 @@ func FindOthers(t csv2.AccountType, es []Entry) []*csv2.Transaction {
 
 // ID returns a (non-unique) identifier.
 func (e Entry) ID() string {
-	if e.Tr == nil {
+	if e.Tx == nil {
 		panic("nil transaction in ID()")
 	}
-	return e.Tr.ID()
+	return e.Tx.ID()
 }
 
 // Instance is an index of all the transactions
@@ -75,11 +75,11 @@ func New(r *csv2.Report) *Instance {
 	for i := range r.Accounts {
 		rai := &r.Accounts[i]
 		in.accounts[rai.Name] = rai
-		for j, _ := range rai.Transactions {
+		for j := range rai.Transactions {
 			t := &rai.Transactions[j]
 			var e Entry
-			e.Tr = t
-			e.AccountName = rai.Name
+			e.Tx = t
+			e.AccName = rai.Name
 			e.Ty = rai.Type
 
 			eid := e.ID()
