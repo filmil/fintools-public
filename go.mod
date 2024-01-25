@@ -1,4 +1,4 @@
-module github.com/filmil/fintools
+module github.com/filmil/fintools-public
 
 go 1.19
 
