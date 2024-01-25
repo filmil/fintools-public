@@ -1,4 +1,8 @@
-# Google paystub converter for beancount
+# fintools-public ![release](https://github.com/filmil/fintools-public/actions/workflows/release.yml/badge.svg) ![test](https://github.com/filmil/fintools-public/actions/workflows/test.yml/badge.svg)
+
+A collection of tools for financial calculations that can be publicized.
+
+## Google paystub converter for beancount
 
 This directory contains the source code to a small program I wrote to convert
 Google paystubs to beancount transaction records.
@@ -14,11 +18,11 @@ I thought there may be a way to automate this a bit, and wrote this program.
 The program is far from finished at the moment but the bits that work seem to
 work robustly.
 
-# Prerequisites
+## Prerequisites
 
-## go development environment
+### go development environment
 
-## pdf2txt from `python-pdfminer` package in debian.
+### pdf2txt from `python-pdfminer` package in debian.
 
 Install with:
 
@@ -26,7 +30,7 @@ Install with:
 sudo apt-get install python-pdfminer
 ```
 
-# Installation
+## Installation
 
 ```
 git clone git@github.com:filmil/fintools.git
@@ -39,7 +43,7 @@ name.  While better naming scheme is welcome, the reason for this is that my
 beancount setup (unpublished) is ran in a docker container, with only the 
 needed utilities.
 
-## Testing
+### Testing
 
 ```
 cd fintools
@@ -49,15 +53,15 @@ go test ./...
 At the moment expect above steps to fail because tests were removed on purpose.
 :(
 
-# Using `paystub`
+## Using `paystub`
 
-## Download the paystub file as a PDF
+### Download the paystub file as a PDF
 
 Download from Google's paystub front-end the PDF file of your pay stub.  Suppose
 you download it as to `paystub.pdf`.  The actual name will be different and it
 is *always* different for some reason but what to do.
 
-## Convert the paystub file from PDF to XML
+### Convert the paystub file from PDF to XML
 
 This step requires `pdf2txt`:
 
@@ -65,7 +69,7 @@ This step requires `pdf2txt`:
 pdf2txt -t xml -o paystub.xml paystub.pdf
 ```
 
-## Convert the XML file into a beancount transaction
+### Convert the XML file into a beancount transaction
 
 ```
 paystub -input=paystub..xml
@@ -82,14 +86,14 @@ paystub --help
 
 [pmg]: https://github.com/filmil/fintools/tools/cnmd/paystub/main.go
 
-# Using `payxml`
+## Using `payxml`
 
 The program `payxml` produces a bounding box drawing of the paystub. I wrote
 it to visualize what is being analyzed by `paystub`. I will assume that you
 have the `paystub.xml` from when you tested `paystub`
 
 
-# How the paystub is parsed
+## How the paystub is parsed
 
 The idea is very simple: `pdf2txt` produces an XML file in which the paystub
 text is laid out together with bounding boxes that describe where on the paystub
@@ -118,7 +122,7 @@ match the two up.  Once you have a matching, add to the `Transaction`.
 
 Once this structure is built out, it is written using go text templates.
 
-# Bugs and Limitations
+## Bugs and Limitations
 
 * I had to remove tests in order to publish this program. :( Ideas welcome on
 how to make the program self-contained with anonymous tests.
