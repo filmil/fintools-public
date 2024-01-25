@@ -4,7 +4,7 @@ package draw
 import (
 	"image"
 
-	"github.com/filmil/fintools/pkg/xml"
+	"github.com/filmil/fintools-public/pkg/xml"
 	"github.com/llgcode/draw2d"
 )
 

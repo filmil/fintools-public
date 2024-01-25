@@ -2,7 +2,8 @@
 // an image of the decoded bounding boxes as a PNG file.
 //
 // Usage:
-//   payxml -input=<xml_file> -output=<png_file>
+//
+//	payxml -input=<xml_file> -output=<png_file>
 package main
 
 import (
@@ -10,8 +11,8 @@ import (
 	"image/color"
 	"os"
 
-	"github.com/filmil/fintools/pkg/draw"
-	"github.com/filmil/fintools/pkg/xml"
+	"github.com/filmil/fintools-public/pkg/draw"
+	"github.com/filmil/fintools-public/pkg/xml"
 	"github.com/golang/glog"
 	"github.com/llgcode/draw2d/draw2dimg"
 )

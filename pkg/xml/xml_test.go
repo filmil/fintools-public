@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/filmil/fintools/pkg/tx"
+	"github.com/filmil/fintools-public/pkg/tx"
 	"github.com/google/go-cmp/cmp"
 )
 

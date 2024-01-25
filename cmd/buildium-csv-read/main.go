@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/filmil/fintools/pkg/cfg"
-	"github.com/filmil/fintools/pkg/csv2"
-	"github.com/filmil/fintools/pkg/index"
-	"github.com/filmil/fintools/pkg/tiller"
+	"github.com/filmil/fintools-public/pkg/cfg"
+	"github.com/filmil/fintools-public/pkg/csv2"
+	"github.com/filmil/fintools-public/pkg/index"
+	"github.com/filmil/fintools-public/pkg/tiller"
 )
 
 func require(flagName string, value string) {

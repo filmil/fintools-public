@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/filmil/fintools/pkg/csv2"
+	"github.com/filmil/fintools-public/pkg/csv2"
 )
 
 func TestFirstOf(t *testing.T) {

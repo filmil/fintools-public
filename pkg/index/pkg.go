@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/filmil/fintools/pkg/csv2"
+	"github.com/filmil/fintools-public/pkg/csv2"
 )
 
 type Entry struct {

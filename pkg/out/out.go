@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/filmil/fintools/pkg/tx"
+	"github.com/filmil/fintools-public/pkg/tx"
 )
 
 // Employer contains text labels for Deductions->Employer

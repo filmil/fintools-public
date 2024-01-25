@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/filmil/fintools/pkg/tx"
+	"github.com/filmil/fintools-public/pkg/tx"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 )

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/filmil/fintools/pkg/out"
-	"github.com/filmil/fintools/pkg/xml"
+	"github.com/filmil/fintools-public/pkg/out"
+	"github.com/filmil/fintools-public/pkg/xml"
 	"github.com/golang/glog"
 )
 
