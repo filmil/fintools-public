@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"math/big"
 	"sort"
 	"time"
@@ -36,8 +35,8 @@ func (d DateTime) String() string {
 	return fmt.Sprintf("%v", time.Time(d).Format("1/2/2006"))
 }
 
-// GenId generates a stable ID from a given string (account name really)
-func GenId(n string) string {
+// GenID generates a stable ID from a given string (account name really)
+func GenID(n string) string {
 	h := sha256.New()
 	h.Write([]byte(n))
 	return fmt.Sprintf("manual:%x", h.Sum(nil))
@@ -133,7 +132,12 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 
 		ac := i.GetAccountByName(acName)
 
-		acId := GenId(acName)
+		// Reuse or generate the account ID
+		acId := c.GetAccID(acName)
+		if acId == "" {
+			acId = GenID(acName)
+		}
+
 		if _, ok := seen[acName]; !ok {
 			var b Balance
 			b.Date = DateTime(ac.MinDate)
@@ -165,21 +169,17 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 			r.Amount = CalculateAmount(e.Ty, e.Tx.Debit, e.Tx.Credit)
 			r.Tags = "Tax"
 			r.AccountDesc = e.AccName
-			r.AccountNum = ""   // Dunno.
-			r.Institution = ""  // Dunno.
-			r.Month = e.Tx.Date // The first of the month of this date
-			r.Week = e.Tx.Date
+			//r.AccountNum = ""  // Dunno.
+			//r.Institution = "" // Dunno.
+			r.Month = FirstOfMonth(e.Tx.Date)
+			r.Week = FirstOfWeek(e.Tx.Date)
 			r.TransactionID = txid.String()
-			r.AccountID = GenId(acName)
-			r.FullDescription = e.Tx.Description // Dunno.
-			// TODO: filmil - Dunno the rest, see what can be done.
+			r.AccountID = acId
+			r.FullDescription = e.Tx.FullDescription()
 
 			ret.Rows = append(ret.Rows, r)
 		}
-
-		// TODO: filmil - Process transactions.
 		// TODO: filmil - Find the account end balance.
-
 	}
 
 	// Sort rows.
@@ -216,25 +216,25 @@ func (e *Export) WriteRows(w io.Writer) error {
 	}
 	for _, row := range e.Rows {
 		t := time.Time(row.Date)
-		f := t.Format(csv2.DateLayout)
+		f := DateFmt(t)
 		r := []string{
 			"",
-			f,                 // "Date",
-			row.Description,   // "Description",
-			row.Category,      // "Category",
-			USD(&row.Amount),  // "Amount",        // 5
-			row.Tags,          // "Tags",
-			row.AccountDesc,   // "Account", // Account descriptive name
-			row.AccountNum,    // "Account #",
-			"",                // "Institution",
-			f,                 // "Month",          // 10
-			f,                 // "Week",
-			row.TransactionID, //"Transaction ID",
-			row.AccountID,     // "Account ID",
-			"", "Check Number",
-			row.Description, "Full Description", // 15
-			f,  // "Date Added",
-			"", // Categorized Date",
+			f,                        // "Date",
+			row.Description,          // "Description",
+			row.Category,             // "Category",
+			USD(&row.Amount),         // "Amount",        // 5
+			row.Tags,                 // "Tags",
+			row.AccountDesc,          // "Account", // Account descriptive name
+			row.AccountNum,           // "Account #",
+			"",                       // "Institution",
+			DateFmt(FirstOfMonth(t)), // "Month",          // 10
+			DateFmt(FirstOfWeek(t)),  // "Week",
+			row.TransactionID,        //"Transaction ID",
+			row.AccountID,            // "Account ID",
+			"",                       // "Check Number",
+			row.FullDescription,      //  "Full Description", // 15
+			f,                        // "Date Added",
+			"",                       // Categorized Date",
 		}
 		if err := cw.Write(r); err != nil {
 			return fmt.Errorf("could not write row: %+v: %w", row, err)
@@ -243,6 +243,12 @@ func (e *Export) WriteRows(w io.Writer) error {
 	return nil
 }
 
+// DateFmt formats dates in the way used in Tiller.
+func DateFmt(t time.Time) string {
+	return t.Format(csv2.DateLayout)
+}
+
+// USD formats a big float as a dollar amount with sufficient financial precision.
 func USD(b *big.Float) string {
 	return fmt.Sprintf("$%v", b.Text('f', 6))
 }
@@ -272,7 +278,6 @@ func (e *Export) WriteBalances(w io.Writer) error {
 		return fmt.Errorf("could not write header: %w", err)
 	}
 	for _, bal := range e.Balances {
-		log.Printf("bal: %+v", bal)
 		t := time.Time(bal.Date)
 		f := t.Format(csv2.DateLayout)
 		r := []string{
@@ -292,10 +297,21 @@ func (e *Export) WriteBalances(w io.Writer) error {
 			"ACTIVE",            // Account status
 			f,                   // Date Added
 		}
-		log.Printf("r  : %+v", r)
 		if err := cw.Write(r); err != nil {
 			return fmt.Errorf("could not write balance: %+v: %w", bal, err)
 		}
 	}
 	return nil
+}
+
+// First of month returns the time corresponding to the 1st of the month of t.
+func FirstOfMonth(t time.Time) time.Time {
+	var ret time.Time
+	return ret.AddDate(t.Year()-1, int(t.Month())-1, 0)
+}
+
+// FirstOfWeek returns the time corresponding to the Sunday of the week of t.
+func FirstOfWeek(t time.Time) time.Time {
+	var ret time.Time
+	return ret.AddDate(t.Year()-1, int(t.Month())-1, t.Day()-int(t.Weekday()+1))
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 )
 
 type Map struct {
@@ -12,6 +13,8 @@ type Map struct {
 	OriginalName string `json:"original"`
 	// Here is how to categorize it.
 	Category string `json:"category"`
+	// ID is the unique account ID. If not specified, one will be generated.
+	ID string `json:"id"`
 }
 
 type Schema struct {
@@ -29,9 +32,13 @@ func LoadSchema(r io.Reader) (*Schema, error) {
 	return &s, nil
 }
 
+type CatId struct {
+	Category, Id string
+}
+
 type Instance struct {
 	id string
-	m  map[string]string
+	m  map[string]CatId
 }
 
 func (i Instance) GetID() string {
@@ -41,9 +48,20 @@ func (i Instance) GetID() string {
 // GetCat returns a category for the given account. If not found, the account
 // name is returned.
 func (i Instance) GetCat(acc string) string {
-	v, ok := i.m[acc]
-	if !ok {
+	v := i.m[acc].Category
+	if v == "" {
+		// Log a warning since we could potentially add this into the config file.
+		log.Printf("account has no category: %v", acc)
 		return acc
+	}
+	return v
+}
+
+func (i Instance) GetAccID(acc string) string {
+	v := i.m[acc].Id
+	if v == "" {
+		// Log a warning since we could potentially add this into the config file.
+		log.Printf("account has no ID: %v", acc)
 	}
 	return v
 }
@@ -52,9 +70,9 @@ func (i Instance) GetCat(acc string) string {
 func New(s *Schema) *Instance {
 	var i Instance
 	i.id = s.ID
-	i.m = map[string]string{}
+	i.m = map[string]CatId{}
 	for _, m := range s.AccountMap {
-		i.m[m.OriginalName] = m.Category
+		i.m[m.OriginalName] = CatId{m.Category, m.ID}
 	}
 	return &i
 }

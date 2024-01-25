@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/filmil/fintools/pkg/cfg"
 	"github.com/filmil/fintools/pkg/csv2"
@@ -12,26 +13,54 @@ import (
 	"github.com/filmil/fintools/pkg/tiller"
 )
 
+func require(flagName string, value string) {
+	if value == "" {
+		log.Fatalf("flag --%v=... is required", flagName)
+	}
+}
+
+func init() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, `Converts Buildium CSV reports into Tiller CSV reports.
+
+Use to convert from Buildium into Tiller.  All flag parameters are required. Sample
+config file is below.
+
+{
+  "account_id": "manual:some_account",
+  "account_map": [
+    {
+      "original": "Utilities - Common SD1/Sewer",
+      "category": "XX - Category",
+      "id": "manual:foo"
+    }
+  ]
+}
+
+Args:
+`)
+
+		flag.PrintDefaults()
+	}
+}
+
 func main() {
 	var (
-		inFile, rowsFile, balancesFile string
+		// Obvious variable names are obvious.
+		inFile, rowsFile, balancesFile, cfgFile string
 	)
 
-	flag.StringVar(&inFile, "csv", "", "Input CSV file")
-	flag.StringVar(&rowsFile, "rows", "", "Output `rows` file")
-	flag.StringVar(&balancesFile, "bal", "", "Output `balances` file")
+	flag.StringVar(&inFile, "csv", "", "Input CSV file from Buildium")
+	flag.StringVar(&rowsFile, "rows", "", "Output Tiller `Transactions` CSV file")
+	flag.StringVar(&balancesFile, "bal", "", "Output Tiller `Balances` CSV file")
+	flag.StringVar(&cfgFile, "cfg", "", "Configuration file, for automated account categorization, JSON format")
 
 	flag.Parse()
 
-	if inFile == "" {
-		log.Fatalf("flag --csv=... is required")
-	}
-	if rowsFile == "" {
-		log.Fatalf("flag --rows=... is required")
-	}
-	if balancesFile == "" {
-		log.Fatalf("flag --bal=... is required")
-	}
+	require("csv", inFile)
+	require("rows", rowsFile)
+	require("bal", balancesFile)
+	require("cfg", cfgFile)
 
 	f, err := os.Open(inFile)
 	if err != nil {
@@ -50,40 +79,35 @@ func main() {
 
 	i := index.New(r)
 
-	// TODO: filmil- load the config from a file instead
-	lsx, err := cfg.LoadSchema(strings.NewReader(`
-		{
-		  "account_id": "manual:some_account",
-		  "account_map": [
-			{
-				"original": "Utilities - Common SD1/Sewer",
-				"category": "XX - Category"
-			}
-		  ]
-		}
+	cr, err := os.Open(cfgFile)
+	if err != nil {
+		log.Fatalf("could not read config: %v: %v", cfgFile, err)
+	}
 
-	`))
+	lsx, err := cfg.LoadSchema(cr)
 	if err != nil {
 		log.Fatalf("could not load schema: %v", err)
 	}
 	cfx := cfg.New(lsx)
 	t := tiller.New(i, cfx)
 
-	rf, err := os.Create(rowsFile)
+	if err := writeFile(rowsFile, t.WriteRows); err != nil {
+		log.Fatalf("%v", err)
+	}
+	if err := writeFile(balancesFile, t.WriteBalances); err != nil {
+		log.Fatalf("%v", err)
+	}
+}
+
+// Write file using the writer function provided.
+func writeFile(fn string, writeFn func(w io.Writer) error) error {
+	rf, err := os.Create(fn)
 	if err != nil {
-		log.Fatalf("could not create rows file: %v: %v", rowsFile, err)
+		return fmt.Errorf("could not create rows file: %v: %w", fn, err)
 	}
 	defer rf.Close()
-	if err := t.WriteRows(rf); err != nil {
-		log.Fatalf("could not write rows file: %v: %v", rowsFile, err)
+	if err := writeFn(rf); err != nil {
+		return fmt.Errorf("could not write rows file: %v: %w", fn, err)
 	}
-
-	bf, err := os.Create(balancesFile)
-	if err != nil {
-		log.Fatalf("could not create balances file: %v: %v", balancesFile, err)
-	}
-	defer bf.Close()
-	if err := t.WriteBalances(bf); err != nil {
-		log.Fatalf("could not create balances file: %v: %v", balancesFile, err)
-	}
+	return nil
 }

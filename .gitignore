@@ -19,3 +19,4 @@ xml_private_test.go
 # These are special files.
 bals.txt
 rows.txt
+cfg.json

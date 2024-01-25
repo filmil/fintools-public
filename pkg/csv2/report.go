@@ -32,6 +32,13 @@ type Transaction struct {
 	Debit, Credit, Balance        big.Float
 }
 
+// FullDescription returns the full description of the transaction, with most
+// fields bunched together.  This hopefully preserves all the description info
+// in one place.
+func (t Transaction) FullDescription() string {
+	return fmt.Sprintf("%v %v Unit:%q Type:%q", t.Name, t.Description, t.Unit, t.Type)
+}
+
 func (t Transaction) String() string {
 	return strings.Join(
 		[]string{
@@ -141,7 +148,8 @@ type Account struct {
 	BeginBalance, EndBalance big.Float
 	TotalCredit, TotalDebit  big.Float
 	Transactions             []Transaction
-	MinDate                  time.Time
+	// The minimal date of the transactions.
+	MinDate time.Time
 }
 
 // Report is a structured report from an account.
