@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "out",
+    srcs = ["out.go"],
+    importpath = "github.com/filmil/fintools-public/pkg/out",
+    visibility = ["//visibility:public"],
+    deps = ["//pkg/tx"],
+)

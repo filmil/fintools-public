@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "draw",
+    srcs = ["draw.go"],
+    importpath = "github.com/filmil/fintools-public/pkg/draw",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/xml",
+        "@com_github_llgcode_draw2d//:draw2d",
+    ],
+)

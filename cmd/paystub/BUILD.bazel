@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "paystub_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/filmil/fintools-public/cmd/paystub",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/out",
+        "//pkg/xml",
+        "@com_github_golang_glog//:glog",
+    ],
+)
+
+go_binary(
+    name = "paystub",
+    embed = [":paystub_lib"],
+    visibility = ["//visibility:public"],
+)

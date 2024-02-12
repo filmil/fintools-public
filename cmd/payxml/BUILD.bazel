@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "payxml_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/filmil/fintools-public/cmd/payxml",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/draw",
+        "//pkg/xml",
+        "@com_github_golang_glog//:glog",
+        "@com_github_llgcode_draw2d//draw2dimg",
+    ],
+)
+
+go_binary(
+    name = "payxml",
+    embed = [":payxml_lib"],
+    visibility = ["//visibility:public"],
+)

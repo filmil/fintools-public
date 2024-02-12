@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "csv2",
+    srcs = [
+        "raw.go",
+        "report.go",
+    ],
+    importpath = "github.com/filmil/fintools-public/pkg/csv2",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "csv2_test",
+    srcs = [
+        "raw_test.go",
+        "report_test.go",
+    ],
+    embed = [":csv2"],
+    deps = ["@com_github_google_go_cmp//cmp"],
+)

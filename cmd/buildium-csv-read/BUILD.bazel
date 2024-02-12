@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "buildium-csv-read_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/filmil/fintools-public/cmd/buildium-csv-read",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/cfg",
+        "//pkg/csv2",
+        "//pkg/index",
+        "//pkg/tiller",
+    ],
+)
+
+go_binary(
+    name = "buildium-csv-read",
+    embed = [":buildium-csv-read_lib"],
+    visibility = ["//visibility:public"],
+)

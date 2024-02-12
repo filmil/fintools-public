@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "tiller",
+    srcs = ["pkg.go"],
+    importpath = "github.com/filmil/fintools-public/pkg/tiller",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/cfg",
+        "//pkg/csv2",
+        "//pkg/index",
+        "@com_github_google_uuid//:uuid",
+    ],
+)
+
+go_test(
+    name = "tiller_test",
+    srcs = ["pkg_test.go"],
+    embed = [":tiller"],
+    deps = ["//pkg/csv2"],
+)

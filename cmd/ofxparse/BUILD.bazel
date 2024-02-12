@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "ofxparse_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/filmil/fintools-public/cmd/ofxparse",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_aclindsa_ofxgo//:ofxgo"],
+)
+
+go_binary(
+    name = "ofxparse",
+    embed = [":ofxparse_lib"],
+    visibility = ["//visibility:public"],
+)
