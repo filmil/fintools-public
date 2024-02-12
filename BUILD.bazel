@@ -1,7 +1,6 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
 # bazel run //:gazelle
-# bazel run //:gazelle -- update-repos --from_file=go.mod
 # gazelle:prefix github.com/filmil/fintools-public
 gazelle(name = "gazelle")
 
@@ -10,4 +9,15 @@ load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 # bazel run //:buildifier
 buildifier(
     name = "buildifier",
+)
+
+# bazel run //:gazelle-update-repos
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
 )
