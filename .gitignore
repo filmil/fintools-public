@@ -20,3 +20,6 @@ xml_private_test.go
 bals.txt
 rows.txt
 cfg.json
+
+# Bazel convenience links
+bazel-*

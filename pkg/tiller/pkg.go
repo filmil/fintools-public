@@ -16,6 +16,28 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ColumnNames []string = []string{
+		"T",
+		"Date",
+		"Description",
+		"Category",
+		"Amount", // 5
+		"Tags",
+		"Account", // Account descriptive name
+		"Account #",
+		"Institution",
+		"Month", // 10
+		"Week",
+		"Transaction ID",
+		"Account ID",
+		"Check Number",
+		"Full Description", // 15
+		"Date Added",
+		"Categorized Date",
+	}
+)
+
 type Dater interface {
 	DateM() time.Time
 }
@@ -66,6 +88,30 @@ type Row struct {
 	FullDescription string
 	// These should likely stay unset.
 	DateAdded, CategorizedDate string
+}
+
+func (row Row) AsCSVRow() []string {
+	t := time.Time(row.Date)
+	f := DateFmt(t)
+	return []string{
+		"",
+		f,                        // "Date",
+		row.Description,          // "Description",
+		row.Category,             // "Category",
+		USD(&row.Amount),         // "Amount",        // 5
+		row.Tags,                 // "Tags",
+		row.AccountDesc,          // "Account", // Account descriptive name
+		row.AccountNum,           // "Account #",
+		"",                       // "Institution",
+		DateFmt(FirstOfMonth(t)), // "Month",          // 10
+		DateFmt(FirstOfWeek(t)),  // "Week",
+		row.TransactionID,        //"Transaction ID",
+		row.AccountID,            // "Account ID",
+		"",                       // "Check Number",
+		row.FullDescription,      //  "Full Description", // 15
+		f,                        // "Date Added",
+		"",                       // Categorized Date",
+	}
 }
 
 func (r Row) DateM() time.Time {
@@ -192,50 +238,12 @@ func New(i *index.Instance, c *cfg.Instance) *Export {
 func (e *Export) WriteRows(w io.Writer) error {
 	cw := csv.NewWriter(w)
 	defer cw.Flush()
-	h := []string{
-		"T",
-		"Date",
-		"Description",
-		"Category",
-		"Amount", // 5
-		"Tags",
-		"Account", // Account descriptive name
-		"Account #",
-		"Institution",
-		"Month", // 10
-		"Week",
-		"Transaction ID",
-		"Account ID",
-		"Check Number",
-		"Full Description", // 15
-		"Date Added",
-		"Categorized Date",
-	}
+	h := ColumnNames
 	if err := cw.Write(h); err != nil {
 		return fmt.Errorf("could not write header: %w", err)
 	}
 	for _, row := range e.Rows {
-		t := time.Time(row.Date)
-		f := DateFmt(t)
-		r := []string{
-			"",
-			f,                        // "Date",
-			row.Description,          // "Description",
-			row.Category,             // "Category",
-			USD(&row.Amount),         // "Amount",        // 5
-			row.Tags,                 // "Tags",
-			row.AccountDesc,          // "Account", // Account descriptive name
-			row.AccountNum,           // "Account #",
-			"",                       // "Institution",
-			DateFmt(FirstOfMonth(t)), // "Month",          // 10
-			DateFmt(FirstOfWeek(t)),  // "Week",
-			row.TransactionID,        //"Transaction ID",
-			row.AccountID,            // "Account ID",
-			"",                       // "Check Number",
-			row.FullDescription,      //  "Full Description", // 15
-			f,                        // "Date Added",
-			"",                       // Categorized Date",
-		}
+		r := row.AsCSVRow()
 		if err := cw.Write(r); err != nil {
 			return fmt.Errorf("could not write row: %+v: %w", row, err)
 		}
