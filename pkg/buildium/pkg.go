@@ -11,7 +11,7 @@ const (
 	IndexAmount = 6
 
 	// Account identifier.
-	IndexAccountId = 8
+	IndexAccountID = 8
 
 	// Transaction date, as US string.
 	IndexEntryDate = 2
@@ -28,7 +28,7 @@ const (
 	IndexAccountTypeName = 29
 
 	// "3" => "4000 RENT INCOME" etc.
-	IndexGlAccountId = IndexAccountId
+	IndexGlAccountId = IndexAccountID
 	// "4000 RENT INCOME"
 	IndexGlAccountName = 11
 )

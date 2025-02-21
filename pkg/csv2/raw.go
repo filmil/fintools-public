@@ -19,9 +19,13 @@ type CSVData struct {
 func (d CSVData) String() string {
 	var ret []string
 	for n, l := range d.data {
-		ret = append(ret, fmt.Sprintf("%010d: %v", n, strings.Join(l, ",")))
+		ret = append(ret, fmt.Sprintf("%010d: %v", n, strings.Join(l, " , ")))
 	}
 	return strings.Join(ret, "\n")
+}
+
+func (d CSVData) Size() int {
+	return len(d.data)
 }
 
 // Finds the first cell beginning row that contains `s`.  Returns NotFound if none found.

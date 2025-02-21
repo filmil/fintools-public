@@ -16,6 +16,16 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	IndexDate        = 1
+	IndexDescription = 2
+	IndexCategory    = 4
+	IndexAmount      = 5
+	IndexTags        = 6
+	IndexAccountName = 7
+	IndexAccountID   = 13
+)
+
 var (
 	ColumnNames []string = []string{
 		"T",
