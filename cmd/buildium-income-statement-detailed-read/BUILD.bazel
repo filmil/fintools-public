@@ -5,6 +5,11 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/filmil/fintools-public/cmd/buildium-income-statement-detailed-read",
     visibility = ["//visibility:private"],
+    deps = [
+        "//pkg/cfg",
+        "//pkg/csv2",
+        "//pkg/tiller",
+    ],
 )
 
 go_binary(
