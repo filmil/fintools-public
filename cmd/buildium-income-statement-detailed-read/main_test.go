@@ -22,8 +22,8 @@ func TestConvert(t *testing.T) {
 212729100,4,12/31/2024,by Jonathan Martinez,,by Jonathan Martinez,-30.00,1,120327,,625353,Utility Income,,0,40,0,Unit 3 - Jonathan Martinez,Jonathan Martinez,5855978,Jonathan Martinez,1,2399056,3,1665680,300 Berry Avenue,625353,0,0,4,Income,Payment,,1,1/2/2025,S01,10001,0,,1,0,True,,Utility Income,Q4-2024,,3,10/1/2024,12/31/2024
 `,
 			expected: `T,Date,Description,Category,Amount,Tags,Account,Account #,Institution,Month,Week,Transaction ID,Account ID,Check Number,Full Description,Date Added,Categorized Date
-,12/31/2024,Unit 3 - Jonathan Martinez,,Category 3,1025.00,Tax,manual:some_account_1,,1/1/0001,12/31/0000,,,manual:some_account_1,,1/1/0001,
-,12/31/2024,Unit 3 - Jonathan Martinez,,Category 120327,30.00,Tax,manual:some_account_1,,1/1/0001,12/31/0000,,,manual:some_account_1,,1/1/0001,
+,12/31/2024,Unit 3 - Jonathan Martinez,Category 3,1025.00,Tax,manual:some_account_1,,,1/1/0001,12/31/0000,,manual:some_account_1,,,1/1/0001,
+,12/31/2024,Unit 3 - Jonathan Martinez,Category 120327,30.00,Tax,manual:some_account_1,,,1/1/0001,12/31/0000,,manual:some_account_1,,,1/1/0001,
 `,
 			schema: `
             {
