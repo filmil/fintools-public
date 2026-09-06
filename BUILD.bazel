@@ -4,7 +4,7 @@ load("@bazel_gazelle//:def.bzl", "gazelle")
 # gazelle:prefix github.com/filmil/fintools-public
 gazelle(name = "gazelle")
 
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
 # bazel run //:buildifier
 buildifier(
